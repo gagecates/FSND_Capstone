@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from models import setup_db
 from flask_cors import CORS
+from models import Food
 
 def create_app(test_config=None):
 
@@ -10,13 +11,15 @@ def create_app(test_config=None):
     CORS(app)
 
     @app.route('/')
-    def get_greeting():
-        excited = os.environ['EXCITED']
-        greeting = "Hello" 
-        if excited == 'true': greeting = greeting + "!!!!!"
-        return greeting
+    def list_foods():
+        food = Food.query.all()
+        if not food:
+            abort(404)
+        return food
 
-    @app.route('/coolkids')
+
+    @app.route('/food', methods=['POST'])
+    @requires_auth('post:drinks'))
     def be_cool():
         return "Be cool, man, be coooool! You're almost a FSND grad!"
 
