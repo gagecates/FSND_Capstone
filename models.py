@@ -18,26 +18,69 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
+
+def db_drop_and_create_all():
+    db.drop_all()
     db.create_all()
 
 
-'''
-Person
-Have title and release year
-'''
-class Person(db.Model):  
-  __tablename__ = 'People'
+# models -----------------------------------------
 
-  id = Column(Integer, primary_key=True)
-  name = Column(String)
-  catchphrase = Column(String)
+# food --------------------
+class Food(db.Model):  
+  __tablename__ = 'Food'
 
-  def __init__(self, name, catchphrase=""):
-    self.name = name
-    self.catchphrase = catchphrase
+  id = db.Column(Integer, primary_key=True)
+  food = db.Column(String)
+  protein = db.Column(String)
+  carbs = db.Column(String)
+  fat = db.Column(String)
+  calories = db.Column(Integer)
 
-  def format(self):
-    return {
-      'id': self.id,
-      'name': self.name,
-      'catchphrase': self.catchphrase}
+  def __init__(self, food, protein, carbs, fat, calories):
+    self.food = food
+    self.protein = protein
+    self.carbs = carbs
+    self.fat = fat
+    self.calories = calories
+
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
+
+  def update(self):
+    db.session.commit()
+    
+  def delete(self):
+    db.session.delete(self)
+    db.session.commit()
+
+
+# macros ----------------
+class Macros(db.Model):  
+  __tablename__ = 'Macros'
+
+  id = db.Column(Integer, primary_key=True)
+  user = db.Column(String)
+  protein = db.Column(String)
+  carbs = db.Column(String)
+  fats = db.Column(String)
+  calories = db.Column(Integer)
+
+  def __init__(self, user, protein, carbs, fats, calories):
+    self.user = user
+    self.protein = protein
+    self.carbs = carbs
+    self.fats = fats
+    self.calories = calories
+
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
+
+  def update(self):
+    db.session.commit()
+    
+  def delete(self):
+    db.session.delete(self)
+    db.session.commit()
