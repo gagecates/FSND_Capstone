@@ -66,9 +66,8 @@ def get_macros():
 '''
 User submits a food. If the food is not found need an error raised and a way to add to DB.
 If the food is in the DB, its macros and calories get added to the users current macro and calorie count.
-The users Macros are then updated in the DB using a POSTcommand.
+The users Macros are then updated in the DB.
 '''
-
 
 @app.route('/food', methods=['PATCH'])
 #@requires_auth('post:food')
@@ -104,8 +103,8 @@ def ate_food():
         'fats': add_fats,
         'calories': add_calories
     })
-    
 
+# add a new food to the database
 @app.route('/food/new', methods=['POST'])
 #@requires_auth('post:new_food')
 def new_food():
@@ -126,38 +125,27 @@ def new_food():
         'message': "The food has been added"
     })
 
-
+# manually submit macro information
 @app.route('/macros', methods=['POST'])
 #@requires_auth('post:food')
 def add_macros_manually():
-    user = Macros.query.filter_by(user = "gage").first()
+    user = Macros.query.filter_by(user = "Kevin").first()
     data = request.get_json()
-    if 'food' not in data:
-        abort(404)
+    if 'protein' and 'carbs' and 'fats' and 'calories' not in data:
+        abort(400)
     
-    user_protein = user.protein
-    user_carbs = user.carbs
-    user_fats = user.fats
-    user_calories = user.calories
-
-    food_protein = data.protein
-    food_carbs = data.carbs
-    food_fats = data.fats
-    food_calories = data.calories
-
-    add_protein = user_protein + food_protein
-    add_carbs = user_carbs + food_carbs
-    add_fats = user_fats + food_fats
-    add_calories = user_calories + food_calories
-
-    update_user = Macros(
-        protein = add_protein,
-        carbs = add_carbs,
-        fats = add_fats,
-        calories = add_calories
-        )
-
-    update_user.update()
+    add_protein = int(user.protein) + data['protein']
+    add_carbs = int(user.carbs) + data['carbs']
+    add_fats = int(user.fats) + data['fats']
+    add_calories = int(user.calories) + data['calories']
+    print(user.calories)
+    user.user = user.user,
+    user.protein = add_protein,
+    user.carbs = add_carbs,
+    user.fats = add_fats,
+    user.calories = add_calories
+    
+    user.update()
 
     return jsonify({
         'success': True,
