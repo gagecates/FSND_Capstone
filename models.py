@@ -32,9 +32,9 @@ class Food(db.Model):
 
   id = db.Column(Integer, primary_key=True)
   food = db.Column(String)
-  protein = db.Column(String)
-  carbs = db.Column(String)
-  fat = db.Column(String)
+  protein = db.Column(Integer)
+  carbs = db.Column(Integer)
+  fat = db.Column(Integer)
   calories = db.Column(Integer)
 
   def __init__(self, food, protein, carbs, fat, calories):
@@ -62,9 +62,9 @@ class Macros(db.Model):
 
   id = db.Column(Integer, primary_key=True)
   user = db.Column(String)
-  protein = db.Column(String)
-  carbs = db.Column(String)
-  fats = db.Column(String)
+  protein = db.Column(Integer)
+  carbs = db.Column(Integer)
+  fats = db.Column(Integer)
   calories = db.Column(Integer)
 
   def __init__(self, user, protein, carbs, fats, calories):

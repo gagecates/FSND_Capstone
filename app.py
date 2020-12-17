@@ -1,9 +1,10 @@
 import os
 import json
-from flask import Flask, jsonify, abort
+from flask import Flask, request, jsonify, abort
 from models import setup_db
 from flask_cors import CORS
 from models import db_drop_and_create_all, Food, Macros
+from auth import AuthError, requires_auth
 
 app = Flask(__name__)
 setup_db(app)
@@ -26,6 +27,20 @@ new_item = Macros(
 )
 new_item.insert()
 '''
+add_food = "chips"
+add_protein = 50
+add_carbs = 100
+add_fats = 20
+add_calories = 200
+
+new_food = Food(
+    food = add_food,
+    protein = add_protein,
+    carbs = add_carbs,
+    fat = add_fats,
+    calories = add_calories
+)
+#new_food.insert()
 
 @app.route('/macros', methods=['GET'])
 #@requires_auth('get:macros')
@@ -52,48 +67,38 @@ def get_macros():
 User submits a food. If the food is not found need an error raised and a way to add to DB.
 If the food is in the DB, its macros and calories get added to the users current macro and calorie count.
 The users Macros are then updated in the DB using a POSTcommand.
-
 '''
 
-@app.route('/food', methods=['POST'])
+
+@app.route('/food', methods=['PATCH'])
 #@requires_auth('post:food')
-def add_food():
-    user = Macros.query.filter_by(user = "gage").first()
+def ate_food():
+    user = Macros.query.filter_by(user = "Kevin").first()
     data = request.get_json()
-    if 'food' not in data:
+    food_term = data["food"]
+    food = Food.query.filter(Food.food.ilike(f'%{food_term}%')).first()
+    if not food:
         return ({
             'success': False,
             'message': "Looks like that food is not saved. You will need to add it."
         })
+
+    add_protein = int(user.protein) + int(food.protein)
+    add_carbs = int(user.carbs) + int(food.carbs)
+    add_fats = int(user.fats) + int(food.fat)
+    add_calories = int(user.calories) + int(food.calories)
+
+    user.user = user.user,
+    user.protein = add_protein,
+    user.carbs = add_carbs,
+    user.fats = add_fats,
+    user.calories = add_calories
     
-    food = Food.query.filter_by(food = data['food'].lower()).first()
-
-    user_protein = user.protein
-    user_carbs = user.carbs
-    user_fats = user.fats
-    user_calories = user.calories
-
-    food_protein = food.protein
-    food_carbs = food.carbs
-    food_fats = food.fats
-    food_calories = food.calories
-
-    add_protein = user_protein + food_protein
-    add_carbs = user_carbs + food_carbs
-    add_fats = user_fats + food_fats
-    add_calories = user_calories + food_calories
-
-    update_user = Macros(
-        protein = add_protein,
-        carbs = add_carbs,
-        fats = add_fats,
-        calories = add_calories
-        )
-    update_user.update()
+    user.update()
 
     return jsonify({
         'success': True,
-        'food': food,
+        'food': food_term,
         'protein': add_protein,
         'carbs': add_carbs,
         'fats': add_fats,
@@ -103,21 +108,21 @@ def add_food():
 
 @app.route('/food/new', methods=['POST'])
 #@requires_auth('post:new_food')
-def new_food(payload):
+def new_food():
     data = request.get_json()
     new_food = Food(
-        food = data.food.lower(),
-        protein = data.protein,
-        carbs = data.carbs,
-        fats = data.fats,
-        calories = data.calories
+        food = data['food'].lower(),
+        protein = data['protein'],
+        carbs = data['carbs'],
+        fat = data['fats'],
+        calories = data['calories']
     )
 
     new_food.insert()
 
     return jsonify({
         'success': True,
-        'food': new_food,
+        'food': new_food.food,
         'message': "The food has been added"
     })
 
