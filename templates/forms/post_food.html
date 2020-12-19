@@ -1,0 +1,22 @@
+{% extends 'layouts/main.html' %}
+{% block title %}New Artist{% endblock %}
+{% block content %}
+  <div class="form-wrapper">
+    <form method="patch" class="form">
+      <h3 class="form-heading">What did you eat?</h3>
+      <div class="form-group">
+        <label for="name">Food</label>
+        {{ form.food(class_ = 'form-control', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label>Serving(s)</label>
+          <div class="form-inline">
+            <div class="form-group">
+              {{ form.servings(class_ = 'form-control', placeholder='Servings', autofocus = true) }}
+        </div>
+      </div>
+      <input type="submit" value="Submit Food" class="btn btn-primary btn-lg btn-block">
+      {{ form.csrf_token() }}
+    </form>
+  </div>
+{% endblock %}

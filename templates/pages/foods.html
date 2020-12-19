@@ -1,0 +1,27 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Foods{% endblock %}
+{% block content %}
+<ul>
+	{% for food in foods %}
+	<li>
+		<div class="item">
+			<h5>{{ food.food }}</h5>
+			<h6><b>Calories:</b> {{ food.calories }}g
+				<b> | Protein:</b> {{ food.protein }}g 
+				<b> | Carbs:</b> {{ food.carbs }}g 
+				<b> | Fats:</b> {{ food.fat }}g 
+			</h6>
+		</div>
+	</li>
+	{% endfor %}
+</ul>
+<div class="container">                
+	<ul class="pagination">
+	  <li><a href="/food?page=1">1</a></li>
+	  <li><a href="/food?page=2">2</a></li>
+	  <li><a href="/food?page=3">3</a></li>
+	  <li><a href="/food?page=4">4</a></li>
+	  <li><a href="/food?page=5">5</a></li>
+	</ul>
+</div>
+{% endblock %}

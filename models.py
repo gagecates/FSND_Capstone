@@ -55,6 +55,16 @@ class Food(db.Model):
     db.session.delete(self)
     db.session.commit()
 
+  def format(self):
+    return {
+      'id': self.id,
+      'food': self.food,
+      'protein': self.protein,
+      'carbs': self.carbs,
+      'fat': self.fat,
+      'calories':self.calories
+    }
+
 
 # macros ----------------
 class Macros(db.Model):  
