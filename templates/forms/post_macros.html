@@ -1,15 +1,11 @@
 {% extends 'layouts/main.html' %}
-{% block title %}New Food{% endblock %}
+{% block title %}Post Macros{% endblock %}
 {% block content %}
   <div class="form-wrapper">
     <form method="post" class="form">
-      <h3 class="form-heading">Add new food</h3>
+      <h3 class="form-heading">Manually Add Macros</h3>
       <div class="form-group">
-        <label for="food">Food</label>
-            {{ form.food(class_ = 'form-control', placeholder='Food Name', autofocus = true) }}
-      </div>
-      <div class="form-group">
-        <label for='calories'>Calories</label>
+        <label for="calories">Calories</label>
             {{ form.calories(class_ = 'form-control', placeholder='Calories', autofocus = true) }}
       </div>
       <div class="form-group">
@@ -25,7 +21,7 @@
             {{ form.fats(class_ = 'form-control', placeholder='Fats', autofocus = true) }}
       </div>
       <br>
-      <input type="submit" value="Add Food" class="btn btn-primary btn-lg btn-block">
+      <input type="submit" value="Submit Macros" class="btn btn-primary btn-lg btn-block">
       {{ form.csrf_token() }}
     </form>
   </div>

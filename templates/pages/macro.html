@@ -1,0 +1,22 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Macros{% endblock %}
+{% block content %}
+<Ul>
+    <li>
+		<h3>Calories</h3>
+        <h4>{{ user.calories }}</h4>
+    </li>
+    <li>
+        <h3>Protein</h3>
+        <h4>{{ user.protein }}</h4>
+    </li>
+    <li>
+        <h3>Carbs</h3>
+        <h4>{{ user.carbs }}</h4>
+    </li>   
+    <li>
+        <h3>Fats</h3>
+        <h4>{{ user.fats }}</h4>
+    </li>
+</ul>
+{% endblock %}

@@ -44,3 +44,17 @@ class NewFood(Form):
     fats = IntegerField(
         'fats', validators=[DataRequired()]
     )
+
+class EditFood(Form):
+    calories = IntegerField(
+        'calories', validators=[DataRequired()]
+    )
+    protein = IntegerField(
+        'protein', validators=[DataRequired()]
+    )
+    carbs = IntegerField(
+        'carbs', validators=[DataRequired()]
+    )
+    fats = IntegerField(
+        'fats', validators=[DataRequired()]
+    )

@@ -5,12 +5,24 @@
 	{% for food in foods %}
 	<li>
 		<div class="item">
-			<h5>{{ food.food }}</h5>
+			<h3>{{ food.food }}</h3>
 			<h6><b>Calories:</b> {{ food.calories }}g
 				<b> | Protein:</b> {{ food.protein }}g 
 				<b> | Carbs:</b> {{ food.carbs }}g 
 				<b> | Fats:</b> {{ food.fat }}g 
 			</h6>
+			<form>
+				<input type="submit"
+						value="Edit"
+						formmethod="get"
+						formaction="{{ url_for('edit_food_form', food_id=food.id) }}">
+			</form>	
+			<form>
+				<input type="submit"
+						value="Delete"
+						formmethod="post"
+						formaction="{{ url_for('delete_food', food_id=food.id) }}">
+			</form>
 		</div>
 	</li>
 	{% endfor %}

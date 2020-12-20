@@ -1,6 +1,7 @@
 alembic==1.4.3
 appdirs==1.4.4
 attrs==20.3.0
+authlib
 awscli==1.18.193
 botocore==1.19.33
 certifi==2020.12.5
@@ -34,9 +35,11 @@ PyJWT==1.7.1
 pyparsing==2.4.7
 pytest==6.1.2
 python-dateutil==2.8.1
+python-dotenv
 python-editor==1.0.4
 python-jose==3.2.0
 PyYAML==5.3.1
+requests
 rsa==4.5
 s3transfer==0.3.3
 six==1.15.0
@@ -46,3 +49,6 @@ urllib3==1.26.2
 virtualenv==20.2.1
 Werkzeug==1.0.1
 wrapt==1.11.1
+
+
+
