@@ -1,8 +1,14 @@
 import json
-from flask import request, _request_ctx_stack
+import os
+from flask import request, _request_ctx_stack, session, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
+from os import environ
+
+AUTH0_DOMAIN = 'fnsd-gmc.us.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'Macros'
 
 #Auth0_login = 'https://fnsd-gmc.us.auth0.com/authorize?audience=Macros&response_type=token&client_id=zeu5Q4B8xrU7BymT7dxwW7VTh6To2chH&redirect_uri=https://localhost:5000/home'
 
@@ -66,6 +72,7 @@ def check_permissions(permission, payload):
 
 
 def verify_decode_jwt(token):
+    print(AUTH0_DOMAIN)
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)
@@ -123,7 +130,11 @@ def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            token = get_token_auth_header()
+            token = None
+            if session['token']:
+                token = session['token']
+            else:
+                token = get_token_auth_header()
             payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)

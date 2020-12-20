@@ -2,7 +2,8 @@ import os
 import json
 import babel
 import requests
-from flask import Flask, request, jsonify, abort
+import constants
+from flask import Flask, request, jsonify, abort, session, make_response
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from models import setup_db
 from flask_cors import CORS, cross_origin
@@ -26,7 +27,8 @@ def after_request(response):
 	return response
 
 
-SECRET_KEY = os.urandom(32)
+#SECRET_KEY = 'os.urandom(32)'
+SECRET_KEY = '8675309'
 app.config['SECRET_KEY'] = SECRET_KEY
 
 # run function below upon initial startup to initialize tables. Delete/comment out after creation. 
@@ -85,28 +87,33 @@ def index():
 @app.route('/login')
 @cross_origin()
 def login():
-    return auth0.authorize_redirect(redirect_uri='https://localhost:5000/callback')
+    #return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',)
+    return redirect('https://fnsd-gmc.us.auth0.com/authorize?audience=Macros&response_type=token&client_id=zeu5Q4B8xrU7BymT7dxwW7VTh6To2chH&redirect_uri=http://localhost:5000/callback')
 
 @app.route('/callback', methods=['GET'])
 @cross_origin()
 def callback_handling():
-    print('aye')
     # Handles response from token endpoint
     token = auth0.authorize_access_token()
     session['token'] = token['access_token']
-    print(session['token'])
+
+    print(session['token']) 
     return render_template('pages/app_home.html')
 
-
-# home page -------------------------------------
-@app.route('/homes')
-def home_page():
-  return render_template('/pages/app_home.html')
+@app.route('/logout')
+@cross_origin()
+def log_out():
+	# clear the session
+	session.clear()
+	# redirect user to logout endpoint
+	params = {'returnTo': url_for('index', _external=True), 'client_id': AUTH0_CLIENT_ID}
+	return redirect('http://fnsd-gmc.us.auth0.com' + '/v2/logout?' + urlencode(params))
 
 
 # get all foods from database -----------------
 @app.route('/food', methods=['GET'])
-def get_food():
+@requires_auth('get:foods')
+def get_food(payload):
     foods = Food.query.all()
     paged_foods = paginate_foods(request, foods)
     return render_template('/pages/foods.html', foods = paged_foods)
@@ -114,8 +121,8 @@ def get_food():
 
 # show current users macros -------------------
 @app.route('/macros', methods=['GET'])
-#@requires_auth('get:macros')
-def get_macros():
+@requires_auth('get:macros')
+def get_macros(payload):
     user = Macros.query.filter_by(user = "Kevin").first()
     if not user:
         abort(400)
@@ -127,37 +134,25 @@ def get_macros():
 
     return render_template('pages/macro.html', user = user)
 
-# get individual food details -------------------
-@app.route('/food<int:food_id>', methods=['GET'])
-#@requires_auth('get:macros')
-def get_food_details(food_id):
-    food = Food.query.get(food_id)
-    if not food:
-        abort(404)
-
-
+# get new food form --------------------------
 @app.route('/food/add', methods=['GET'])
-def food_add_form():
+@requires_auth('post:food')
+def food_add_form(payload):
     form = PostFood()
     return render_template('forms/post_food.html', form=form)
 
-
+# get add macros form ------------------------
 @app.route('/macros/add', methods=['GET'])
-def macros_add_form():
+@requires_auth('post:macros')
+def macros_add_form(payload):
     form = PostMacros()
     return render_template('forms/post_macros.html', form=form)
     
 
-
-'''
-User submits a food. If the food is not found need an error raised and a way to add to DB.
-If the food is in the DB, its macros and calories get added to the users current macro and calorie count.
-The users Macros are then updated in the DB.
-'''
 # consumed food submisison --------------------
 @app.route('/food/add', methods=['POST'])
-#@requires_auth('post:food')
-def ate_food():
+@requires_auth('post:food')
+def ate_food(payload):
     form = PostFood()
     user = Macros.query.filter_by(user = "Kevin").first()
     food_term = request.form["food"]
@@ -186,15 +181,16 @@ def ate_food():
 
 # get new food form -----------------
 @app.route('/food/new', methods=['GET'])
-def get_new_food_form():
+@requires_auth('post:new-food')
+def get_new_food_form(payload):
     form = NewFood()
     return render_template('forms/new_food.html', form=form)
 
 
 # add a new food to the database ----------------
 @app.route('/food/new', methods=['POST'])
-#@requires_auth('post:new_food')
-def new_food():
+@requires_auth('post:new-food')
+def new_food(payload):
     foods = Food.query.all()
     paged_foods = paginate_foods(request, foods)
     form = NewFood()
@@ -225,7 +221,8 @@ def new_food():
 
 # get edit food form -----------------
 @app.route('/food/<int:food_id>/edit', methods=['GET'])
-def edit_food_form(food_id):
+@requires_auth('patch:food')
+def edit_food_form(payload, food_id):
     form = EditFood()
     food = Food.query.get(food_id)
     return render_template('forms/edit_food.html', form=form, food = food.food)
@@ -233,8 +230,8 @@ def edit_food_form(food_id):
 
 # edit food in databae ----------------
 @app.route('/food/<int:food_id>/edit', methods=['POST'])
-#@requires_auth('post:new_food')
-def edit_food(food_id):
+@requires_auth('patch:food')
+def edit_food(payload, food_id):
     food = Food.query.get(food_id)
 
     food.protein = request.form['protein']
@@ -258,8 +255,8 @@ def edit_food(food_id):
 
 # delete food in databae ----------------
 @app.route('/food/<int:food_id>', methods=['POST'])
-#@requires_auth('post:new_food')
-def delete_food(food_id):
+@requires_auth('delete:food')
+def delete_food(payload, food_id):
     food = Food.query.get(food_id)
     print(food)
     if not food:
@@ -281,8 +278,8 @@ def delete_food(food_id):
 
 # manually submit macro information -------------
 @app.route('/macros/add', methods=['POST'])
-#@requires_auth('post:food')
-def add_macros_manually():
+@requires_auth('post:macros')
+def add_macros_manually(payload):
     user = Macros.query.filter_by(user = "Kevin").first()
     if 'protein' and 'carbs' and 'fats' and 'calories' not in request.form:
         abort(400)

@@ -52,7 +52,11 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
+            {% if auth_status != true %}
             <li><a href="/login">login</a></li>
+            {% else %}
+            <li><a href="/logout">logout</li>
+            {% endif %}
             <li><a href="{{ url_for('get_food') }}">foods</a></li>
             <li><a href="{{ url_for('get_macros') }}">me</a></li>
           </ul>
