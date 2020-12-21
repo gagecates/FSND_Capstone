@@ -5,6 +5,7 @@ from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 from os import environ
+from server import *
 
 AUTH0_DOMAIN = 'fnsd-gmc.us.auth0.com'
 ALGORITHMS = ['RS256']
@@ -59,20 +60,20 @@ def get_token_auth_header():
 
 
 def check_permissions(permission, payload):
-    def check_permissions(permission, payload):
-        if 'permissions' not in payload:
+    print(payload['permissions'])
+    print(permission)
+    if 'permissions' not in payload:
             abort(400)
 
-        if permission not in payload['permissions']:
-            raise AuthError({
-                'code': 'unauthorized',
-                'description': 'Permission Not found',
-            }, 401)
-        return True
-
+    if permission not in payload['permissions']:
+        raise AuthError({
+            'code': 'unauthorized',
+            'description': 'Permission Not found',
+        }, 401)
+    return True
+        
 
 def verify_decode_jwt(token):
-    print(AUTH0_DOMAIN)
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)

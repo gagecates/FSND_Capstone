@@ -14,12 +14,12 @@ from flask import url_for
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
 
-AUTH0_CALLBACK_URL = os.getenv('AUTH0_CALLBACK_URL')
-AUTH0_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
-AUTH0_CLIENT_SECRET = os.getenv('AUTH0_CLIENT_SECRET')
-AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
-AUTH0_BASE_URL = os.getenv('AUTH0_BASE_URL')
-AUTH0_AUDIENCE = os.getenv('AUTH0_AUDIENCE')
+AUTH0_CALLBACK_URL = os.environ.get('AUTH0_CALLBACK_URL')
+AUTH0_CLIENT_ID = os.environ.get('AUTH0_CLIENT_ID')
+AUTH0_CLIENT_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
+AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
+AUTH0_BASE_URL = os.environ.get('AUTH0_BASE_URL')
+AUTH0_AUDIENCE = os.environ.get('AUTH0_AUDIENCE')
 
 app = Flask(__name__)
 

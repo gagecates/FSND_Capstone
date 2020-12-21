@@ -20,6 +20,7 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
+
 @app.after_request
 def after_request(response):
 	response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
@@ -28,13 +29,16 @@ def after_request(response):
 
 
 #SECRET_KEY = 'os.urandom(32)'
-SECRET_KEY = '8675309'
+SECRET_KEY = 'randomkey'
 app.config['SECRET_KEY'] = SECRET_KEY
 
 # run function below upon initial startup to initialize tables. Delete/comment out after creation. 
 #db_drop_and_create_all()
+
 '''
-name = "James"
+manually add a user:
+
+name = 'Gage Cates'
 my_protein = 50
 my_carbs = 10
 my_fats = 100
@@ -48,20 +52,6 @@ new_item = Macros(
 )
 new_item.insert()
 '''
-add_food = "chips"
-add_protein = 50
-add_carbs = 100
-add_fats = 20
-add_calories = 200
-
-new_food = Food(
-    food = add_food,
-    protein = add_protein,
-    carbs = add_carbs,
-    fat = add_fats,
-    calories = add_calories
-)
-#new_food.insert()
 
 
 Foods_Per_Page = 10
@@ -79,35 +69,40 @@ def paginate_foods(request, all_foods):
 
 # login page -------------------------------------
 @app.route('/')
-@cross_origin()
-def index():
-  return render_template('/pages/app_login.html')
+def home():
+    if 'user' in session:
+        print(session['token'])
+        return render_template('/pages/app_home.html', user = session['user'])
+    else:
+        return render_template('/pages/app_login.html')
+
 
 
 @app.route('/login')
-@cross_origin()
 def login():
-    #return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',)
-    return redirect('https://fnsd-gmc.us.auth0.com/authorize?audience=Macros&response_type=token&client_id=zeu5Q4B8xrU7BymT7dxwW7VTh6To2chH&redirect_uri=http://localhost:5000/callback')
+    return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',_external=True, audience = AUTH0_AUDIENCE)
 
+# auth0 login callback ----------------------------
 @app.route('/callback', methods=['GET'])
-@cross_origin()
 def callback_handling():
-    # Handles response from token endpoint
-    token = auth0.authorize_access_token()
-    session['token'] = token['access_token']
+    auth = auth0.authorize_access_token()
+    user = auth0.get('userinfo')
+    userinfo = user.json()
+    # store jwt in session
+    session['token'] = auth['access_token']
+     # store username in session
+    session['user'] = userinfo['name']
 
-    print(session['token']) 
-    return render_template('pages/app_home.html')
+    return render_template('pages/app_home.html', user = session['user'])
+
 
 @app.route('/logout')
-@cross_origin()
 def log_out():
 	# clear the session
 	session.clear()
 	# redirect user to logout endpoint
-	params = {'returnTo': url_for('index', _external=True), 'client_id': AUTH0_CLIENT_ID}
-	return redirect('http://fnsd-gmc.us.auth0.com' + '/v2/logout?' + urlencode(params))
+	params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
+	return redirect('https://fnsd-gmc.us.auth0.com' + '/v2/logout?' + urlencode(params))
 
 
 # get all foods from database -----------------
@@ -116,6 +111,9 @@ def log_out():
 def get_food(payload):
     foods = Food.query.all()
     paged_foods = paginate_foods(request, foods)
+    if len(paged_foods) == 0:
+        flash('Looks like you need to add some food first!')
+        return render_template('/pages/app_home.html', user = session['user'])
     return render_template('/pages/foods.html', foods = paged_foods)
 
 
@@ -123,7 +121,8 @@ def get_food(payload):
 @app.route('/macros', methods=['GET'])
 @requires_auth('get:macros')
 def get_macros(payload):
-    user = Macros.query.filter_by(user = "Kevin").first()
+    username = session['user']
+    user = Macros.query.filter_by(user = username).first()
     if not user:
         abort(400)
 
@@ -132,7 +131,7 @@ def get_macros(payload):
     fats = user.fats
     calories = user.calories
 
-    return render_template('pages/macro.html', user = user)
+    return render_template('pages/macro.html', user = user, username = username)
 
 # get new food form --------------------------
 @app.route('/food/add', methods=['GET'])
@@ -153,8 +152,9 @@ def macros_add_form(payload):
 @app.route('/food/add', methods=['POST'])
 @requires_auth('post:food')
 def ate_food(payload):
+    username = session['user']
     form = PostFood()
-    user = Macros.query.filter_by(user = "Kevin").first()
+    user = Macros.query.filter_by(user = username).first()
     food_term = request.form["food"]
     servings = request.form['servings']
     food = Food.query.filter(Food.food.ilike(f'%{food_term}%')).first()
@@ -192,7 +192,6 @@ def get_new_food_form(payload):
 @requires_auth('post:new-food')
 def new_food(payload):
     foods = Food.query.all()
-    paged_foods = paginate_foods(request, foods)
     form = NewFood()
     current_foods = Food.query.all()
     if db.session.query(exists().where(Food.food == request.form['food'])).scalar():
@@ -209,6 +208,9 @@ def new_food(payload):
 
     new_food.insert()
 
+    current_foods = Food.query.all()
+    paged_foods = paginate_foods(request, current_foods)
+    print(paged_foods)
     flash(request.form['food'] + ' has been successfully added!')
     return render_template('/pages/foods.html', foods = paged_foods)
     
@@ -254,11 +256,10 @@ def edit_food(payload, food_id):
     })
 
 # delete food in databae ----------------
-@app.route('/food/<int:food_id>', methods=['POST'])
+@app.route('/food/<int:food_id>/delete', methods=['POST'])
 @requires_auth('delete:food')
 def delete_food(payload, food_id):
     food = Food.query.get(food_id)
-    print(food)
     if not food:
         abort(404)
 
@@ -269,18 +270,14 @@ def delete_food(payload, food_id):
     foods = Food.query.all()
     paged_foods = paginate_foods(request, foods)
     return render_template('/pages/foods.html', foods = paged_foods)
-    
-    return jsonify({
-        'success': True,
-        'food': new_food.food,
-        'message': "The food has been added"
-    })
+
 
 # manually submit macro information -------------
 @app.route('/macros/add', methods=['POST'])
 @requires_auth('post:macros')
 def add_macros_manually(payload):
-    user = Macros.query.filter_by(user = "Kevin").first()
+    username = session['user']
+    user = Macros.query.filter_by(user = username).first()
     if 'protein' and 'carbs' and 'fats' and 'calories' not in request.form:
         abort(400)
     add_protein = int(user.protein) + int(request.form['protein'])
@@ -336,6 +333,13 @@ def not_found(error):
 
     }), 422
 
+@app.errorhandler(AuthError)
+def authentification_failed(AuthError):
+	return json.dumps({
+		'success': False,
+		'error': AuthError.status_code,
+		'message': AuthError.error['description']
+		}), AuthError.status_code
 
 
 if __name__ == '__main__':
