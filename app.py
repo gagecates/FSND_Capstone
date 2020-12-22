@@ -28,30 +28,12 @@ def after_request(response):
 	return response
 
 
-#SECRET_KEY = 'os.urandom(32)'
+#SECRET_KEY = 'os.urandom(32)' / cannot use a random key or will throw errors.
 SECRET_KEY = 'randomkey'
 app.config['SECRET_KEY'] = SECRET_KEY
 
 # run function below upon initial startup to initialize tables. Delete/comment out after creation. 
 #db_drop_and_create_all()
-
-'''
-manually add a user:
-
-name = 'Gage Cates'
-my_protein = 50
-my_carbs = 10
-my_fats = 100
-my_calories = 200
-new_item = Macros(
-    user = name, 
-    protein = my_protein, 
-    carbs = my_carbs, 
-    fats = my_fats, 
-    calories = my_calories
-)
-new_item.insert()
-'''
 
 
 Foods_Per_Page = 10
@@ -67,6 +49,7 @@ def paginate_foods(request, all_foods):
 
     return page_foods
 
+
 # login page -------------------------------------
 @app.route('/')
 def home():
@@ -77,7 +60,7 @@ def home():
         return render_template('/pages/app_login.html')
 
 
-
+# redirects to auth 0 login ----------------------
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',_external=True, audience = AUTH0_AUDIENCE)
@@ -95,7 +78,7 @@ def callback_handling():
 
     return render_template('pages/app_home.html', user = session['user'])
 
-
+# auth0 logout. Redirects to login page ---------
 @app.route('/logout')
 def log_out():
 	# clear the session
@@ -116,6 +99,10 @@ def get_food(payload):
         return render_template('/pages/app_home.html', user = session['user'])
     return render_template('/pages/foods.html', foods = paged_foods)
 
+    return jsonify({
+        'success': True,
+    })
+
 
 # show current users macros -------------------
 @app.route('/macros', methods=['GET'])
@@ -133,6 +120,11 @@ def get_macros(payload):
 
     return render_template('pages/macro.html', user = user, username = username)
 
+    return jsonify({
+        'success': True,
+    })
+
+
 # get new food form --------------------------
 @app.route('/food/add', methods=['GET'])
 @requires_auth('post:food')
@@ -140,12 +132,21 @@ def food_add_form(payload):
     form = PostFood()
     return render_template('forms/post_food.html', form=form)
 
+    return jsonify({
+        'success': True,
+    })
+
+
 # get add macros form ------------------------
 @app.route('/macros/add', methods=['GET'])
 @requires_auth('post:macros')
 def macros_add_form(payload):
     form = PostMacros()
     return render_template('forms/post_macros.html', form=form)
+
+    return jsonify({
+        'success': True,
+    })
     
 
 # consumed food submisison --------------------
@@ -178,6 +179,10 @@ def ate_food(payload):
     flash('Your macros have been updated!')
     return render_template('/pages/macro.html', user= user)
 
+    return jsonify({
+        'success': True,
+    })
+
 
 # get new food form -----------------
 @app.route('/food/new', methods=['GET'])
@@ -185,6 +190,10 @@ def ate_food(payload):
 def get_new_food_form(payload):
     form = NewFood()
     return render_template('forms/new_food.html', form=form)
+
+    return jsonify({
+        'success': True,
+    })
 
 
 # add a new food to the database ----------------
@@ -216,8 +225,6 @@ def new_food(payload):
     
     return jsonify({
         'success': True,
-        'food': new_food.food,
-        'message': "The food has been added"
     })
 
 
@@ -228,6 +235,10 @@ def edit_food_form(payload, food_id):
     form = EditFood()
     food = Food.query.get(food_id)
     return render_template('forms/edit_food.html', form=form, food = food.food)
+
+    return jsonify({
+        'success': True,
+    })
 
 
 # edit food in databae ----------------
@@ -251,9 +262,8 @@ def edit_food(payload, food_id):
     
     return jsonify({
         'success': True,
-        'food': new_food.food,
-        'message': "The food has been added"
     })
+
 
 # delete food in databae ----------------
 @app.route('/food/<int:food_id>/delete', methods=['POST'])
@@ -270,6 +280,10 @@ def delete_food(payload, food_id):
     foods = Food.query.all()
     paged_foods = paginate_foods(request, foods)
     return render_template('/pages/foods.html', foods = paged_foods)
+
+    return jsonify({
+        'success': True,
+    })
 
 
 # manually submit macro information -------------
@@ -298,10 +312,6 @@ def add_macros_manually(payload):
 
     return jsonify({
         'success': True,
-        'protein': add_protein,
-        'carbs': add_carbs,
-        'fats': add_fats,
-        'calories': add_calories
     })
 
 
