@@ -132,7 +132,7 @@ def requires_auth(permission=''):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = None
-            if session['token']:
+            if 'token' in session:
                 token = session['token']
             else:
                 token = get_token_auth_header()

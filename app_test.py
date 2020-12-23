@@ -55,18 +55,52 @@ class MacroAppTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
 
+
     def get_food_fail(self): 
         res = self.client().get('/food', headers=get_headers(''))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 401)
-        self.assertEqual(data['code'], 'unauthorized')
-        
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['code'], 'Authorization header is expected.')
 
-    def test_delete_question(self):
+    
+    def get_macrso(self): 
+        res = self.client().get('/macros', headers=get_headers(User))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+
+    def get_macros_fail(self): 
+        res = self.client().get('/macros', headers=get_headers(''))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['code'], 'Authorization header is expected.')
+
+    def add_food(self): 
+        res = self.client().post('/food/add', headers=get_headers(User))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def add_food(self): 
+        res = self.client().post('/food/add', headers=get_headers(''))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['code'], 'Authorization header is expected.')
+
+
+    def test_delete_food(self):
         # create a new food to be deleted, then delete
         food = Food(
-                food = "Steak",
+                food = "Chicken",
                 protein = 5,
                 carbs = 1,
                 fat = 1,
@@ -94,7 +128,7 @@ class MacroAppTestCase(unittest.TestCase):
     def test_delete_question_fail(self):
         # create a new food to be deleted, then delete
         food = Food(
-                food = "Steak",
+                food = "Chicken",
                 protein = 5,
                 carbs = 1,
                 fat = 1,
@@ -117,31 +151,6 @@ class MacroAppTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
 
-
-    def test_question_search_404(self):
-
-        # test using a funky entry for a search
-        search_terms = {
-            'searchTerm': '8675309',
-        }
-
-        res = self.client().post('/questions/search', json=search_terms)
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
-
-    def test_page_out_of_range_400(self):
-
-        # send request for out of range page number
-        response = self.client().get('/questions?page=100')
-        data = json.loads(response.data)
-
-        # check response status code and message
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'bad request')
 
 # Make the tests conveniently executable
 
