@@ -63,7 +63,7 @@ def home():
 # redirects to auth 0 login ----------------------
 @app.route('/login')
 def login():
-    return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',_external=True, audience = AUTH0_AUDIENCE)
+    return auth0.authorize_redirect(redirect_uri='https://gage-heroku-app.herokuapp.com/callback',_external=True, audience = AUTH0_AUDIENCE)
 
 # auth0 login callback ----------------------------
 @app.route('/callback', methods=['GET'])
