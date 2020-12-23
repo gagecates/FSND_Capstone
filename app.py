@@ -20,6 +20,7 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
+db_drop_and_create_all()
 
 @app.after_request
 def after_request(response):
