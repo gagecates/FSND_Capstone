@@ -1,38 +1,36 @@
 import os
 import unittest
+import flask_testing
 import json
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import exists
-from flaskr import create_app
-from models import setup_db, Food, Macros
+from flask_testing import TestCase
+from flask import session
+from app import create_app, app
+from dotenv import load_dotenv
+from models import setup_db, Food, Macros, db_drop_and_create_all
 
 
-Admin_Token = 
-User_Token = 
+load_dotenv()
 
-
+database_path = os.environ.get('TEST_DATABASE_URL')
 
 def get_headers(token):
     return {'Authorization': f'Bearer {token}'}
 
 
-class MacroAppTestCase(unittest.TestCase):
-    """This class represents the trivia test case"""
+class MacroAppTestCase(TestCase):
+    """This class represents the macro app test case"""
+
+    def create_app(self):
+        return app
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "macro_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        self.database_path = database_path
         setup_db(self.app, self.database_path)
 
-        self.new_question = {
-            'question': 'Who was the first President of the United States?',
-            'answer': 'George Washington',
-            'difficulty': 1,
-            'category': '3'
-        }
 
         # binds the app to the current context
         with self.app.app_context():
@@ -41,6 +39,9 @@ class MacroAppTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
 
+        self.admin = os.environ.get('admin_token')
+        self.user = os.environ.get('user_token')
+
     
     # after each test revert changes
     def tearDown(self):
@@ -48,58 +49,107 @@ class MacroAppTestCase(unittest.TestCase):
         pass
 
 
-    def get_food(self): 
-        res = self.client().get('/food', headers=get_headers(User))
-        data = json.loads(res.data)
+    def test_get_food(self): 
+        res = self.client().get('/food', headers=get_headers(self.user))
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
+        self.assert_template_used('/pages/foods.html')
 
-
-    def get_food_fail(self): 
+    
+    def test_get_food_fail(self): 
         res = self.client().get('/food', headers=get_headers(''))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 401)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['code'], 'Authorization header is expected.')
+        self.assertEqual(data['message'], 'Token not found.')
 
     
-    def get_macrso(self): 
-        res = self.client().get('/macros', headers=get_headers(User))
-        data = json.loads(res.data)
+    '''
+    Need to set session['user'] key in order for this test to work.
+    
+    def test_get_macros(self): 
+        res = self.client().get('/macros', headers=get_headers(self.user))
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
+        self.assertEqual(data['success'], True
+    '''
 
 
-    def get_macros_fail(self): 
+    def test_get_macros_fail(self): 
         res = self.client().get('/macros', headers=get_headers(''))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 401)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['code'], 'Authorization header is expected.')
+        self.assertEqual(data['message'], 'Token not found.')
 
-    def add_food(self): 
-        res = self.client().post('/food/add', headers=get_headers(User))
-        data = json.loads(res.data)
+
+    '''
+    Need to set session['user'] key in order for this test to work.
+
+    def test_add_food(self): 
+        res = self.client().post('/food/add', data=dict(
+            food='Chicken',
+            servings=1
+        ), headers=get_headers(self.user))
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
+        self.assert_template_used('/pages/macro.html')
+    '''
 
-    def add_food(self): 
+    def test_add_food_fail(self): 
         res = self.client().post('/food/add', headers=get_headers(''))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 401)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['code'], 'Authorization header is expected.')
+        self.assertEqual(data['message'], 'Token not found.')
+
+
+
+    def test_new_food(self): 
+        res = self.client().post('/food/new', data=dict(
+            food='Chicken',
+        ), headers=get_headers(self.user))
+
+        self.assertEqual(res.status_code, 200)
+        self.assert_template_used('forms/new_food.html')
+        
+
+    def test_new_food_fail(self): 
+        res = self.client().post('/food/new', headers=get_headers(''))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Token not found.')
+
+
+    def test_edit_food(self): 
+        res = self.client().post('/food/3/edit', data=dict(
+            protein=15,
+            carbs=15,
+            fats=15,
+            calories=100,
+        ), headers=get_headers(self.admin))
+
+        self.assertEqual(res.status_code, 200)
+        self.assert_template_used('/pages/foods.html')
+        
+
+    def test_edit_food_fail(self): 
+        res = self.client().post('/food/1000/edit', headers=get_headers(self.admin))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
 
     def test_delete_food(self):
         # create a new food to be deleted, then delete
-        food = Food(
+        insert_food = Food(
                 food = "Chicken",
                 protein = 5,
                 carbs = 1,
@@ -107,52 +157,60 @@ class MacroAppTestCase(unittest.TestCase):
                 calories = 1
             )
 
-        food.insert()
-        food_id = food.id
-
+        insert_food.insert()
         # record number of foods before delete
         number_food = len(Food.query.all())
 
         # delete new food
-        res = self.client().delete(f'/food/{food_id}/delete')
-        data = json.loads(res.data)
+        res = self.client().post(f'/food/{insert_food.id}/delete', headers=get_headers(self.admin))
 
         # record number of questions after delete
         number_food_new = len(Food.query.all())
+
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
         self.assertEqual(number_food_new, number_food -1)
+        self.assert_template_used('/pages/foods.html')
 
 
-    def test_delete_question_fail(self):
-        # create a new food to be deleted, then delete
-        food = Food(
-                food = "Chicken",
-                protein = 5,
-                carbs = 1,
-                fat = 1,
-                calories = 1
-            )
-
-        food.insert()
-        food_id = 100
-
-        # record number of foods before delete
-        number_food = len(Food.query.all())
-
-        # delete new food
-        res = self.client().delete(f'/food/{food_id}/delete')
+    def test_delete_food_fail(self):
+        res = self.client().post('/food/1000/delete', headers=get_headers(self.admin))
         data = json.loads(res.data)
 
-        # record number of questions after delete
-        number_food_new = len(Food.query.all())
-
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
 
-# Make the tests conveniently executable
+    '''
+    Need to set session['user'] key in order for these two tests to to work.
+
+    def test_manually_add_macros(self): 
+        res = self.client().post('/macros/add', data=dict(
+            protein=15,
+            carbs=15,
+            fats=15,
+            calories=100,
+        ), headers=get_headers(self.admin))
+
+        self.assertEqual(res.status_code, 200)
+        self.assert_template_used('/pages/macro.html')
+
+
+    def test_manually_add_macros_fail(self): 
+        res = self.client().post('/macros/add', data=dict(
+            protein=15,
+            carbs=15,
+            fats=15
+        ), headers=get_headers(self.admin))
+        res = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'bad request')
+    '''
+        
+
 
 if __name__ == "__main__":
     unittest.main()
