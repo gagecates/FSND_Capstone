@@ -59,10 +59,8 @@ Install the necessary requirmenets by running:
 ```
 2. Create capstone database in psql
 '''
-    login to psql 
-    CREATE DATABASE capstone;
-    
-''''
+    psql CREATE DATABASE capstone;
+'''
 
 
 3. Set up your DATABASE_URL variable depending on OS:
@@ -119,235 +117,173 @@ Install the necessary requirmenets by running:
 
 Index '/'
 
-- Takes user to login page if not logged in.
-  render_template('/pages/app_login.html')
+- Takes user to login page if not logged in 
+- return render_template('/pages/app_login.html')
 
-- Takes user to app home page if user logged in and session['token'] is available. 
-  render_template('/pages/app_home.html', user = session['user'])
-
+- Takes user to app home page if user logged in and session['token'] is available 
+- return render_template('/pages/app_home.html', user = session['user']))
 
 Login '/login'
 
-- Gets all the info from a selected restaurant
-- <int:id> relpaces the ID of the restaurant you want
-- Returns:
-    {
-        'success': True,
-        'restaurants': [{
-            "id": self.id,
-            "name": self.name,
-            "address": self.address
-            }]
-    }
-
-GET '/restaurants/<int:id>/menu'
-- No Authorization required
-- Gets the menu items that belong to a restaurnt, could be more than one
-- <int:id> replaces the ID of restaurant you want to see the menu items 
-- Returns:
-    {
-        'success': True,
-        "items": [{
-            "name": self.name,
-            "description": self.description,
-            "price": str(self.price),
-            "restaurant_name": self.restaurnt_menu_item.name
-            }, ...]
-    }
-
-POST '/restaurants/<int:id>/reservation'
-- Requred Authorization with 'Customer' role
-- Posts a reservation for the restaurant with id in <int:id>
-- Required input (data type listed inside brackets):
-    {
-        "time_of_res": (datetime),
-        "num_of_people": (int),
-        "name_for_res": (string)
-    }
-- Returns all upcoming reservation for the customer making the reservation:
-    {   
-        'success': True,
-        'upcoming_reservations': [{
-            "time_of_res": self.time_of_res,
-            "num_of_people": self.num_of_people,
-            "restaurant_name": self.restaurant_name,
-        }, ...]
-        
-    }
-
-POST '/restaurants'
-- Requred Authorization with 'Restaurant Manager' role
-- Restaurant Manager can post their restaurant
-- Required input (data type listed inside brackets):
-    {
-        "name": (string),
-        "address": (string)
-    }
-- Returns all the restaurants that the user owns:
-    {
-        "success": True,
-        "owned_restaurants": [{
-            "id": self.id,
-            "name": self.name,
-            "address": self.address
-        }, ...]
-    }
-
-PATCH '/restaurants/<int:id>'
-- Requred Authorization with 'Restaurant Manager' role, and the Restaurant manager can only PATCH his/her own restaurnat
-- Restaurant manager can edit their restaurants. They can edit the name, the address, or both
-- Required input (data type listed inside brackets):
-    {
-        "name": (string),
-        "address": (string)
-    }
-- Returns the the newly updated restaurant with the new information:
-    {
-        "name": 'NEW NAME',
-        "address": 'NEW ADDRESS'
-    }
+- Takes you to Auth0's login window
+- Redirects to the callback URL after succesful login
 
 
-DELETE '/restaurants/<int:id>'
-- Requred Authorization with 'Restaurant Manager' role, and the Restaurant manager can only DELETE his/her own restaurnat
-- Deletes the restaurant with id replaced by <int:id>
-- Returns Response if deletes succesfully:
-    {
-        "success": True
-    }
+Callback '/callback'
+
+- Revieves the JWT from Auth0 and creates a session['user'] key from the username in the token
+- Brings user to the home page and if the user is not currently in the database, adds them
+- return render_template('pages/app_home.html', user = session['user'])
+
+
+Logout '/logout'
+
+- Clears the flask session which clears the session['user'] key
+- Redirects user to login page
+- return render_template('/pages/app_login.html')
+
+
+GET '/food'
+
+- Requires user permissions
+- Gets all foods in food table as paginated
+- Takes user to food page with a list of all foods
+- return render_template('/pages/foods.html', foods = paged_foods)
+
+
+GET '/macros'
+
+- Requires user permissions
+- Gets logged in users macros
+- Takes user to macro page with the breakdown of each
+- return render_template('pages/macro.html', user = user, username = username)
+
+
+GET '/food/add'
+
+- Requires user permissions
+- Takes user to post food form page
+- return render_template('forms/post_food.html', form=form)
+
+
+GET '/macros/add'
+
+- Requires user permissions
+- Takes user to post macros form page
+- return render_template('forms/post_macros.html', form=form)
+
+
+POST '/food/add'
+
+- Requires user permissions
+- Post foods a user consumed 
+- If food is in database it adds the foods macros to the users macros
+- If food is not in database, promps user to add the food first
+- return render_template('/pages/macro.html', user= user)
+
+
+GET '/food/new'
+
+- Requires user permissions
+- Takes user to new food form page
+- return render_template('forms/new_food.html', form=form)
+
+
+POST '/food/new'
+
+- Requires user permissions
+- Post new foods to database
+- If food is in database it promps user that it already exists
+- return render_template('/pages/macro.html', user= user)
+- returns to food page of listed foods
+- return render_template('/pages/foods.html', foods = paged_foods)
+
+
+GET '/food/<int:food_id>/edit'
+
+- Requires admin permissions
+- Takes user to edit food form page after clicking on edit button below food
+- return render_template('forms/edit_food.html', form=form, food = food.food)
+
+
+POST '/food/<int:food_id>/edit'
+
+- Requires admin permissions
+- Edits selected food via food_id and updates food in database
+- Returns user to food page with updated list
+- return render_template('/pages/foods.html', foods = paged_foods)
+
+
+POST '/food/<int:food_id>/delete'
+
+- Requires admin permissions
+- Deletes selected food via food_id and updates food database
+- Returns user to food page with updated list
+- return render_template('/pages/foods.html', foods = paged_foods)
+
+
+
+POST '/macros/add'
+
+- Requires user permissions
+- Adds entered macros to current session['user']'s macros and updates table
+- Returns user to the macro page to view the updated data
+- return render_template('/pages/macro.html', user= user)
+
+
 ```
 
 **ERROR HANDLERS**
-```bash
+```
 
-Error 422 (Unprocessable)
+Error 422
 Returns:
     {
       "success": False,
       "error": 422,
       "message": "unprocessable"
-    }
+    } 422
 
-Error 404 (Bad Request)
+Error 404
 Returns:
     {
         "success": False,
         "error": 404,
         "message": "resource not found"
-    }
+    } 404
 
-Error 401 (Resource Not Found)
-Returns:
-    {
-        "success": False,
-        "error": 401,
-        "message": "Unauthorized Error"
-    }
-
-Error 400 (Unauthorized Error)
+Error 400
 Returns:
     {
         "success": False,
         "error": 400,
         "message": "Bad Request"
-    }
+    } 400
+    
+Error AuthError
+    {
+        "success": False,
+        "error": AuthError.status_code,
+        "message": AuthError.error['description']
+    }AuthError.status_code
 
 
 ```
-
-# Authentication 
- * This app can be run at https://fsnd-happyhour.herokuapp.com/
-
- * You can securly Sign Up or Log In through Auth0: https://fsnd-happyhour.auth0.com/authorize?audience=fsndcapstone&response_type=token&client_id=rY3ee6xjoWocXP7PkCUouHS48vX9YAoo&redirect_uri=https://fsnd-happyhour.herokuapp.com/login-results
 
 
 # Testing
 * Testing instructions
 1. Create a new database for testing (choose and new name ex. _new_testing_db_)
-``` bash
-    createdb new_testing_db
+``` 
+    psql CREATE DATABASE new_testing_db;
 ```
         
 
-2. In **test_app.py** set _database_name_ and _database_path_ from your local machine
+2. In .env file, set the TEST_DATABASE_URL variable to the new_testing_db name
 
 3. In the command line run
-``` bash
+```
     python test_app.py
 ```
 4. The tests will run and should all be completed sucessfully
 
-# Deployment
-This app is deployed on Heroku. For deployment, you need to:
-
-1. Install Heroku CLI and login to Heroku on the terminal
-
-2. create a [setup.sh](setup.sh) file and declare all your variables in the file
-
-3. Install gunicorn
-``` bash
-    pip install gunicorn
-```
-
-4. Create a [Procfile](Procfile) and add the line below. The Procfile instructs Heroku on what to do. Make sure that **your app** is housed in **[app.py](app.py)**
-``` bash
-    web: gunicorn app:app
-```
-
-5. Install the following requirements
-``` bash
-    pip install flask_script
-    pip install flask_migrate
-    pip install psycopg2-binary
-```       
-
-6. Freeze your requirements in the [requirements.txt](requirements.txt) file
-``` bash
-    pip freeze > requirements.txt
-```   
-
-7. Create Heroku app
-``` bash
-    heroku create name_of_your_app
-```
-        
-8. Add git remote for Heroku to local repository
-``` bash
-    git remote add heroku heroku_git_url
-``` 
-
-9. Add postgresql add on for our database
-``` bash
-    heroku addons:create heroku-postgresql:hobby-dev --app name_of_your_application
-```
-10. Add all the Variables in Heroku under settings
-``` bash
-    # This should already exist from the last step
-    DATABASE_URL
-    # Get these from Auth0
-    AUTH0_DOMAIN
-    ALGORITHMS
-    API_AUDIENCE
-```
-        
-10. Push any changes to your GitHub Repository
-
-11. Push to Heroku
-``` bash
-    git push heroku master
-```      
-
-12. Run Migrations to the Heroku database
-``` bash
-    heroku run python manage.py db upgrade --app name_of_your_application
-```
-
-Visit your Heroku app on the hosted URL!
-
-# Authors
-* **Viktor Dojnov** - https://github.com/vdojnov
-
-# Acknowledgments
-Special thanks to:
-* Kurt Galvin - https://github.com/kurtgalvin
-* The Udacity Team!
