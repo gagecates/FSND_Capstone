@@ -55,8 +55,7 @@ Install the necessary requirmenets by running:
 ``` 
     cd ~/{ProjectDirectory}
 ```
-
-    # Then
+# Then
     
 ```
     pip install -r requirements.txt
