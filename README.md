@@ -48,6 +48,7 @@ Once logged in, you will be redirected to the apps home page. Feel free to check
 Install the necessary requirmenets by running:
 
 '''
+
     pip install -r requirements.txt
     
 '''
