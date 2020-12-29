@@ -32,7 +32,7 @@ two user/permissions configured. Copy and use the credentials for whichever you 
 Login credentials:
 ```
     email: usertestmacroapp@gmail.com
-    password: usertestmacroapp
+    password: Usertestmacroapp!
 ```
                     
 **Admin** (User permissions + edit and delete foods)
@@ -40,7 +40,7 @@ Login credentials:
 Login credentials:
 ```
     email: admintestmacroapp@gmail.com
-    password: admintestmacroapp
+    password: Admintestmacroapp!
 ```
 
 Once logged in, you will be redirected to the apps home page. Feel free to check it out from here. 
