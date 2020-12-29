@@ -57,7 +57,6 @@ def create_app(test_config=None):
     @app.route('/')
     def home():
         if 'user' in session:
-            print(session['token'])
             return render_template('/pages/app_home.html', user = session['user'])
         else:
             return render_template('/pages/app_login.html')
@@ -67,7 +66,7 @@ def create_app(test_config=None):
     @app.route('/login')
     def login():
         #return auth0.authorize_redirect(redirect_uri='https://gage-heroku-app.herokuapp.com/callback',_external=True, audience = AUTH0_AUDIENCE)
-        return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback',_external=True, audience = AUTH0_AUDIENCE)
+        return auth0.authorize_redirect(redirect_uri='https://gage-heroku-app.herokuapp.com/callback',_external=True, audience = AUTH0_AUDIENCE)
 
     # auth0 login callback ----------------------------
     @app.route('/callback', methods=['GET'])
@@ -81,7 +80,7 @@ def create_app(test_config=None):
         session['user'] = userinfo['name']
 
         return render_template('pages/app_home.html', user = session['user'])
-        
+
 
     # auth0 logout. Redirects to login page ---------
     @app.route('/logout')
