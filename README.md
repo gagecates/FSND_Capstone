@@ -48,9 +48,7 @@ Once logged in, you will be redirected to the apps home page. Feel free to check
 Install the necessary requirmenets by running:
 
 '''
-
-    pip install -r requirements.txt
-    
+    pip install -r requirements.txt   
 '''
 
 1. Open a terminal and cd to the project directory and install requirements:
