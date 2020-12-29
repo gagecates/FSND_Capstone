@@ -24,7 +24,6 @@ def create_app(test_config=None):
     CORS(app)
 
 
-
     @app.after_request
     def after_request(response):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
@@ -80,9 +79,9 @@ def create_app(test_config=None):
         session['token'] = auth['access_token']
         # store username in session
         session['user'] = userinfo['name']
-        print(session['token'])
 
         return render_template('pages/app_home.html', user = session['user'])
+        
 
     # auth0 logout. Redirects to login page ---------
     @app.route('/logout')
@@ -113,6 +112,7 @@ def create_app(test_config=None):
     @requires_auth('get:macros')
     def get_macros(payload):
         username = session['user']
+        #username = 'Kevin' / this is used for unittesting when there is no session user.
         user = Macros.query.filter_by(user = username).first()
         if not user:
             abort(400)
@@ -146,6 +146,7 @@ def create_app(test_config=None):
     @requires_auth('post:food')
     def ate_food(payload):
         username = session['user']
+        #username = 'Kevin'/ this is used for unittesting when there is no session user.
         form = PostFood()
         user = Macros.query.filter_by(user = username).first()
         food_term = request.form["food"]
@@ -172,7 +173,7 @@ def create_app(test_config=None):
         return render_template('/pages/macro.html', user= user)
 
 
-    # get new food form -----------------
+    # get new food form ----------------------------
     @app.route('/food/new', methods=['GET'])
     @requires_auth('post:new-food')
     def get_new_food_form(payload):
@@ -264,6 +265,7 @@ def create_app(test_config=None):
     @requires_auth('post:macros')
     def add_macros_manually(payload):
         username = session['user']
+        #username = 'Kevin' / this is used for unittesting when there is no session user.
         user = Macros.query.filter_by(user = username).first()
         if 'protein' and 'carbs' and 'fats' and 'calories' not in request.form:
             abort(400)
