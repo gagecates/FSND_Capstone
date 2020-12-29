@@ -70,26 +70,25 @@ Install the necessary requirmenets by running:
 ```
 
 3. Run ALL three migration commands **ONLY** on you first set up:
-
-``` 
+ 
 # Run the init command once
+```
     python manage.py db init
     python manage.py db migrate
     python manage.py db upgrade
+```
 
 # Run the last 2 commands if/when you make changes to database structure
-```
+
 
 4. Set up FLASK_APP variable depending on OS:
 ```
     export FLASK_APP=app.py
-
 ```
 
 5. To run the app use:
 ```
-    flask run
-    
+    flask run  
 ```
 
 * By default, the app will run on http://127.0.0.1:5000/ 
