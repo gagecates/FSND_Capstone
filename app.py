@@ -79,6 +79,19 @@ def create_app(test_config=None):
         # store username in session
         session['user'] = userinfo['name']
 
+        users = Macros.query.all()
+
+        if session['user'] not in users.user:
+            add_user = Macros(
+                user = session['user'],
+                protein = 0,
+                carbs = 0,
+                fats = 0,
+                calories = 0
+            )
+
+            add_user.insert()
+
         return render_template('pages/app_home.html', user = session['user'])
 
 
