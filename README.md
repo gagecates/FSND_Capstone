@@ -30,15 +30,18 @@ two user/permissions configured. Copy and use the credentials for whichever you 
 **User** (Post consumed foods, post macros manually, add new food to database, view personal macro breakdown)
 
 Login credentials:
-                    email: usertestmacroapp@gmail.com
-                    password: usertestmacroapp
+```
+    email: usertestmacroapp@gmail.com
+    password: usertestmacroapp
+```
                     
 **Admin** (User permissions + edit and delete foods)
 
 Login credentials:
-                    email: admintestmacroapp@gmail.com
-                    password: admintestmacroapp
-
+```
+    email: admintestmacroapp@gmail.com
+    password: admintestmacroapp
+```
 
 Once logged in, you will be redirected to the apps home page. Feel free to check it out from here. 
 
