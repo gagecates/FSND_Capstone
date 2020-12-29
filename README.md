@@ -54,13 +54,15 @@ Install the necessary requirmenets by running:
 1. Open a terminal and cd to the project directory and install requirements:
 ``` 
     cd ~/{ProjectDirectory}
+```
     # Then
+```
     pip install -r requirements.txt
 ```
 2. Create capstone database in psql
-'''
+```
     psql CREATE DATABASE capstone;
-'''
+```
 
 
 3. Set up your DATABASE_URL variable depending on OS:
