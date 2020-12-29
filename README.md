@@ -43,12 +43,12 @@ Login credentials:
 Once logged in, you will be redirected to the apps home page. Feel free to check it out from here. 
 
 
-# Run app locally
+# Run locally
 
 Install the necessary requirmenets by running:
 
-```
-  pip install -r requirements.txt
+'''
+pip install -r requirements.txt
 ```
 
 1. Open a terminal and cd to the project directory and install requirements:
@@ -104,7 +104,7 @@ Install the necessary requirmenets by running:
 4. Logout '/logout'
 5. GET '/foods'
 6. GET '/macros'
-7. GETj '/food/add'
+7. GET '/food/add'
 8. GET '/macros/add'
 9. POST '/food/add'
 10. GET '/food/new'
