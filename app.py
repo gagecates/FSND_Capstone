@@ -79,9 +79,9 @@ def create_app(test_config=None):
         # store username in session
         session['user'] = userinfo['name']
 
-        users = Macros.query.all()
+        user_exits = Macros.query.filter_by(user = session['user']).first()
 
-        if session['user'] not in users.user:
+        if not user_exits:
             add_user = Macros(
                 user = session['user'],
                 protein = 0,
