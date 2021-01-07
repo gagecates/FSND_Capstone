@@ -28,7 +28,9 @@ oauth = OAuth(app)
 auth0 = oauth.register(
     'auth0',
     client_id='zeu5Q4B8xrU7BymT7dxwW7VTh6To2chH',
-    client_secret='L7c1jjyvy9nsdExxng77bd0Oahiin0aYOqWueqLE_WVxIHSeoPIliU-FQHk5sq8K',
+    client_secret=(
+        'L7c1jjyvy9nsdExxng77bd0Oahiin0aYOqWueqLE_WVxIHSeoPIliU-FQHk5sq8K'
+    ),
     api_base_url='https://fnsd-gmc.us.auth0.com',
     access_token_url='https://fnsd-gmc.us.auth0.com/oauth/token',
     authorize_url='https://fnsd-gmc.us.auth0.com/authorize',
