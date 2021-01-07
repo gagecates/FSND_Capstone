@@ -35,7 +35,7 @@ def create_app(test_config=None):
 
     # SECRET_KEY = 'os.urandom(32)' / cannot use a random key or will throw
     # errors.
-    SECRET_KEY = 'randomkey'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     app.config['SECRET_KEY'] = SECRET_KEY
 
     # db_drop_and_create_all()

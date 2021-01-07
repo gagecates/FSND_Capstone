@@ -7,9 +7,10 @@ from urllib.request import urlopen
 from os import environ
 from server import *
 
-AUTH0_DOMAIN = 'fnsd-gmc.us.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'Macros'
+
+AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
+ALGORITHMS = os.environ.get['ALGORITHMS']
+API_AUDIENCE = os.environ.get('API_AUDIENCE')
 
 # Auth0_login
 # https://fnsd-gmc.us.auth0.com/authorize?audience=Macros&response_type=token&client_id=zeu5Q4B8xrU7BymT7dxwW7VTh6To2chH&redirect_uri=https://localhost:5000/home'
@@ -70,6 +71,7 @@ def check_permissions(permission, payload):
 
 
 def verify_decode_jwt(token):
+    # urlopen has a common certificate error described here: Scraping: SSL: CERTIFICATE_VERIFY_FAILED error for http://en.wikipedia.org
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)

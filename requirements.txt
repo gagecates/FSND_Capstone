@@ -2,6 +2,7 @@ alembic==1.4.3
 appdirs==1.4.4
 attrs==20.3.0
 Authlib==0.15.2
+autopep8==1.5.4
 awscli==1.18.193
 Babel==2.9.0
 blinker==1.4
@@ -42,6 +43,7 @@ psycopg2-binary==2.8.6
 psycopg2-pool==1.1
 py==1.9.0
 pyasn1==0.4.8
+pycodestyle==2.6.0
 pycparser==2.20
 PyJWT==1.7.1
 pyparsing==2.4.7
