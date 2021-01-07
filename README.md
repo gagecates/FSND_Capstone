@@ -6,6 +6,13 @@ This app is a nutritional macro counter. A logged in user can post consumed food
 add a food if it does not. Macros can be manually individually posted as well. Once logged in, the user is added to the database and their
 macros are tracked and viewable.
 
+# Motivation Behind Project
+
+I chose to do this topic for my fullstack capstone project for a few reasons. 
+It was a great way to showcase all that this course has taught me. 
+The macro app utilizes the REST API while allowing my to sharpen my skills and interest in full stack development.
+Taking personal interest in nutrition and thus the application makes it that much more enjoyable and applicable.
+
 
 # The Stack
 * [Python 3.8.2]
