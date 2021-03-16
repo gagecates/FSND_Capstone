@@ -1,6 +1,6 @@
 # Udacity Full Stack Capstone Project
 
-https://gage-heroku-app.herokuapp.com/
+https://gage-heroku-app.Macros-Yo.com/
  
 This app is a nutritional macro counter. A logged in user can post consumed foods if the food exists in the databse or 
 add a food if it does not. Macros can be manually individually posted as well. Once logged in, the user is added to the database and their
