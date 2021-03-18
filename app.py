@@ -74,7 +74,7 @@ def create_app(test_config=None):
         # auth0.authorize_redirect(redirect_uri='https://gage-heroku-app.herokuapp.com/callback',_external=True,
         # audience = AUTH0_AUDIENCE)
         return auth0.authorize_redirect(
-            redirect_uri='https://macros-yo.herokuapp.com/callback',
+            redirect_uri='https://gage-heroku-app.herokuapp.com/callback',
             _external=True,
             audience=AUTH0_AUDIENCE)
 
